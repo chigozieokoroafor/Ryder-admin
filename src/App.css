@@ -1,0 +1,344 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.navbar {
+  background-color: var(--primary-blue);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  height: 52px;
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-text {
+  font-family: system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.nav-right {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.login-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 0.25rem;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5rem;
+}
+
+.card {
+  background: white;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+.card-subtitle strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+.divider {
+  height: 1px;
+  background-color: #f3f4f6;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.input-group input:not(.code-input) {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  width: 100%;
+}
+
+.input-group input:not(.code-input)::placeholder {
+  color: #9ca3af;
+}
+
+.input-group input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(35, 126, 188, 0.15);
+}
+
+/* Password Input Wrapper */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password:hover {
+  color: #4b5563;
+}
+
+.toggle-password svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.input-group input[type="password"],
+.input-group input[type="text"]#password {
+  padding-right: 2.5rem;
+}
+
+/* Password Criteria Grid */
+.password-criteria {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  margin-top: -0.5rem;
+}
+
+.criteria-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.req-item {
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.req-icon {
+  margin-right: 0.35rem;
+  font-size: 0.875rem;
+  display: inline-block;
+  width: 12px;
+}
+
+.req-icon-svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 0.3rem;
+}
+
+.text-gray {
+  color: #9ca3af;
+}
+
+.text-green {
+  color: #10b981; /* Tailwind emerald-500 */
+}
+
+.text-red {
+  color: #ef4444; /* Tailwind red-500 */
+}
+
+/* Code Inputs Styling */
+.code-inputs {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.code-input {
+  width: 3.2rem;
+  height: 3.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: var(--text-main);
+  background-color: #fff;
+}
+
+.code-input::placeholder {
+  color: #d1d5db;
+  font-weight: 400;
+}
+
+.helper-text {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.link {
+  color: #6b7280;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:hover {
+  color: #374151;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  font-family: inherit;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-blue-hover);
+}
+
+.btn-disabled {
+  background-color: #93c5e6; /* Lighter blue */
+  cursor: not-allowed;
+}
+
+.footer-text {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.footer-text a {
+  color: #6b7280;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-text a:hover {
+  color: #374151;
+}
+
+/* Form Row layout for side-by-side inputs */
+.form-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-row .input-group {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+/* Disabled Input Styling */
+.input-group input:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Organisation Information Step Styles */
+.input-group select {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  width: 100%;
+  appearance: none;
+  background-color: white;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25em 1.25em;
+  color: var(--text-main);
+}
+
+.input-group select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(35, 126, 188, 0.15);
+}
+
+.input-helper-text {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.label-optional {
+  color: #9ca3af;
+  font-weight: 400;
+}
