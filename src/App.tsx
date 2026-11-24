@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import {
@@ -8,6 +8,7 @@ import {
   setStoredEmail,
   setStoredName,
   setStoredToken,
+  setUnauthorizedHandler,
 } from './utils/api';
 
 // Import refactored signup & auth feature components
@@ -46,6 +47,18 @@ function App() {
   const [firstName, setFirstName] = useState<string>(() => getStoredName());
   const [lastName, setLastName] = useState<string>('');
   const [jobTitle, setJobTitle] = useState<string>('');
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setAuthToken('');
+      setPassword('');
+      navigate('/login', { replace: true });
+    });
+
+    return () => {
+      setUnauthorizedHandler(null);
+    };
+  }, [navigate]);
 
   const handleTokenUpdate = (newToken: string) => {
     setAuthToken(newToken);
@@ -130,21 +143,33 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={<Navigate to={authToken ? '/dashboard' : '/signup'} replace />}
+        element={<Navigate to={authToken ? '/dashboard' : '/login'} replace />}
       />
 
       {/* Auth & Onboarding Routes */}
+      <Route
+        path="/login"
+        element={
+          <EmailStep
+            email={email}
+            setEmail={setEmail}
+            mode="login"
+            onCheckComplete={handleEmailCheckComplete}
+          />
+        }
+      />
+      <Route path="/signin" element={<Navigate to="/login" replace />} />
       <Route
         path="/signup"
         element={
           <EmailStep
             email={email}
             setEmail={setEmail}
+            mode="signup"
             onCheckComplete={handleEmailCheckComplete}
           />
         }
       />
-      <Route path="/login" element={<Navigate to="/signup" replace />} />
       <Route
         path="/login/password"
         element={
@@ -228,10 +253,16 @@ function App() {
       {/* Protected Dashboard Routes (requires stored auth token) */}
       <Route
         path="/dashboard"
-        element={authToken ? <DashboardLayout /> : <Navigate to="/signup" replace />}
+        element={
+          authToken ? (
+            <DashboardLayout firstName={firstName} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
       >
         <Route index element={<Navigate to="drivers" replace />} />
-        <Route path="drivers" element={<DriversEmptyState firstName={firstName} />} />
+        <Route path="drivers" element={<DriversEmptyState />} />
         <Route path="bus-stops" element={<BusStops />} />
         <Route path="routes" element={<RoutesView />} />
         <Route path="live-trips" element={<LiveTrips />} />

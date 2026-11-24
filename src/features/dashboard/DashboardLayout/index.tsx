@@ -1,19 +1,47 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import '../Dashboard.css';
+import OnboardingModal from '../OnboardingModal';
+import {
+  areAllChecksComplete,
+  fetchOrganizationChecks,
+  type OrganizationChecks,
+} from '../OnboardingModal/util';
+import type { DashboardOutletContext } from './util';
 
 export interface DashboardLayoutProps {
+  firstName?: string;
   liveTripsCount?: number;
 }
 
 type ActiveNav = 'drivers' | 'bus_stops' | 'live_trips' | 'trip_history' | 'routes';
 
-export default function DashboardLayout({ liveTripsCount = 3 }: DashboardLayoutProps) {
+export default function DashboardLayout({ firstName, liveTripsCount = 3 }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isTripsOpen, setIsTripsOpen] = useState<boolean>(true);
-  const path = location.pathname;
+  const [checks, setChecks] = useState<OrganizationChecks | null>(null);
+  const [showOnboardingModal, setShowOnboardingModal] = useState<boolean>(false);
 
+  const loadChecks = useCallback(async (openIfIncomplete = false) => {
+    try {
+      const result = await fetchOrganizationChecks();
+      setChecks(result);
+      if (areAllChecksComplete(result)) {
+        setShowOnboardingModal(false);
+      } else if (openIfIncomplete) {
+        setShowOnboardingModal(true);
+      }
+    } catch (err) {
+      console.error('Failed to fetch organization checks:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadChecks(true);
+  }, [loadChecks]);
+
+  const path = location.pathname;
   let activeNav: ActiveNav = 'drivers';
   if (path.includes('bus-stops')) activeNav = 'bus_stops';
   if (path.includes('live-trips')) activeNav = 'live_trips';
@@ -21,11 +49,42 @@ export default function DashboardLayout({ liveTripsCount = 3 }: DashboardLayoutP
   if (path.includes('routes')) activeNav = 'routes';
 
   const handleNavigate = (view: string) => {
-    navigate(`/dashboard/${view}`);
+    if (view.startsWith('/')) {
+      navigate(view);
+    } else {
+      navigate(`/dashboard/${view.replace('_', '-')}`);
+    }
+  };
+
+  const handleModalNavigate = (view: string) => {
+    setShowOnboardingModal(false);
+    handleNavigate(view);
+  };
+
+  const handleFinishSetupClick = () => {
+    setShowOnboardingModal(true);
+    void loadChecks(false);
+  };
+
+  const isSetupComplete = checks ? areAllChecksComplete(checks) : false;
+
+  const outletContext: DashboardOutletContext = {
+    checks,
+    refreshChecks: () => loadChecks(false),
   };
 
   return (
     <div className="dashboard-layout">
+      {showOnboardingModal && checks && !isSetupComplete && (
+        <OnboardingModal
+          firstName={firstName}
+          checks={checks}
+          onStepSaved={() => void loadChecks(false)}
+          onNavigate={handleModalNavigate}
+          onClose={() => setShowOnboardingModal(false)}
+        />
+      )}
+
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
@@ -147,19 +206,23 @@ export default function DashboardLayout({ liveTripsCount = 3 }: DashboardLayoutP
           </div>
         </div>
 
-        <div className="setup-card">
-          <svg className="setup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
-            <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
-            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
-            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
-          </svg>
-          <div className="setup-title">Complete setup</div>
-          <div className="setup-text">Finish setting up your RIYDER organisation account and go live.</div>
-          <button className="btn-setup">Finish setup</button>
-        </div>
+        {checks && !isSetupComplete && (
+          <div className="setup-card">
+            <svg className="setup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+              <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+              <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+              <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+            </svg>
+            <div className="setup-title">Complete setup</div>
+            <div className="setup-text">Finish setting up your RIYDER organisation account and go live.</div>
+            <button className="btn-setup" onClick={handleFinishSetupClick}>
+              Finish setup
+            </button>
+          </div>
+        )}
 
-        <div className="sidebar-settings">
+        <div className="sidebar-settings" style={{ marginTop: !checks || isSetupComplete ? 'auto' : '1rem' }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -169,9 +232,8 @@ export default function DashboardLayout({ liveTripsCount = 3 }: DashboardLayoutP
       </aside>
 
       <main className="dashboard-main">
-        <Outlet />
+        <Outlet context={outletContext} />
       </main>
     </div>
   );
 }
-

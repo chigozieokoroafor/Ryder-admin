@@ -6,6 +6,7 @@ export interface AuthLayoutProps {
   title?: string;
   subtitle?: ReactNode;
   showLoginLink?: boolean;
+  showSignupLink?: boolean;
   footerText?: ReactNode;
 }
 
@@ -14,6 +15,7 @@ export default function AuthLayout({
   title,
   subtitle,
   showLoginLink = false,
+  showSignupLink = false,
   footerText,
 }: AuthLayoutProps) {
   return (
@@ -25,8 +27,16 @@ export default function AuthLayout({
         {showLoginLink && (
           <div className="nav-right">
             Already have an account?{' '}
-            <Link to="/signup" className="login-link">
+            <Link to="/login" className="login-link">
               Login
+            </Link>
+          </div>
+        )}
+        {!showLoginLink && showSignupLink && (
+          <div className="nav-right">
+            Don't have an account?{' '}
+            <Link to="/signup" className="login-link">
+              Create account
             </Link>
           </div>
         )}

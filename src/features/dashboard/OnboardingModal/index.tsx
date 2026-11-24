@@ -1,9 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SettlementModal from './SettlementModal';
 import BankModal from './BankModal';
+import {
+  checksToCompletedStepIds,
+  DEFAULT_ORGANIZATION_CHECKS,
+  type OrganizationChecks,
+} from './util';
 
 export interface OnboardingModalProps {
   firstName?: string;
+  checks?: OrganizationChecks;
+  onStepSaved?: () => void;
   onNavigate?: (view: string) => void;
   onClose?: () => void;
 }
@@ -18,13 +25,26 @@ interface OnboardingStep {
 
 type ActiveModalType = 'welcome' | 'settlement' | 'bank';
 
-export default function OnboardingModal({ firstName, onNavigate, onClose }: OnboardingModalProps) {
+export default function OnboardingModal({
+  firstName,
+  checks = DEFAULT_ORGANIZATION_CHECKS,
+  onStepSaved,
+  onNavigate,
+  onClose,
+}: OnboardingModalProps) {
   const [activeModal, setActiveModal] = useState<ActiveModalType>('welcome');
-  const [completedSteps, setCompletedSteps] = useState<number[]>([1]);
+  const [completedSteps, setCompletedSteps] = useState<number[]>(() =>
+    checksToCompletedStepIds(checks)
+  );
+
+  useEffect(() => {
+    setCompletedSteps(checksToCompletedStepIds(checks));
+  }, [checks]);
 
   const handleSaveStep = (stepId: number) => {
     setCompletedSteps((prev) => [...new Set([...prev, stepId])]);
     setActiveModal('welcome');
+    onStepSaved?.();
   };
 
   const isStepCompleted = (id: number) => completedSteps.includes(id);
@@ -68,7 +88,7 @@ export default function OnboardingModal({ firstName, onNavigate, onClose }: Onbo
 
     if (isStepCompleted(step.id)) {
       status = 'completed';
-    } else if (step.id === 2 || step.id === 3) {
+    } else if (step.id === 1 || step.id === 2 || step.id === 3) {
       status = 'current';
     } else if (step.id === 4) {
       status = isStepCompleted(2) && isStepCompleted(3) ? 'current' : 'After 2 & 3';
@@ -90,19 +110,32 @@ export default function OnboardingModal({ firstName, onNavigate, onClose }: Onbo
   }
 
   const handleStart = (stepId: number) => {
-    if (stepId === 2) setActiveModal('settlement');
-    if (stepId === 3) setActiveModal('bank');
-
-    // For Step 4, we dismiss the modal and navigate to the bus stops dashboard
-    if (stepId === 4) {
-      if (onNavigate) {
-        onNavigate('bus_stops');
-      }
+    if (stepId === 1) {
+      onNavigate?.('/signup/organization');
+      return;
     }
-
-    // For step 5 and 6, mark complete as a placeholder for testing
-    if (stepId > 4) handleSaveStep(stepId);
+    if (stepId === 2) {
+      setActiveModal('settlement');
+      return;
+    }
+    if (stepId === 3) {
+      setActiveModal('bank');
+      return;
+    }
+    if (stepId === 4) {
+      onNavigate?.('bus-stops');
+      return;
+    }
+    if (stepId === 5) {
+      onNavigate?.('routes');
+      return;
+    }
+    if (stepId === 6) {
+      onNavigate?.('drivers');
+    }
   };
+
+  const nextActionStep = steps.find((step) => step.status === 'current');
 
   return (
     <div className="modal-overlay">
@@ -177,16 +210,23 @@ export default function OnboardingModal({ firstName, onNavigate, onClose }: Onbo
         </div>
 
         <div className="modal-footer">
-          <button className="btn-primary" onClick={() => setActiveModal('settlement')}>
-            Settlement configuration
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
+          {nextActionStep ? (
+            <button className="btn-primary" onClick={() => handleStart(nextActionStep.id)}>
+              {nextActionStep.title}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          ) : (
+            onClose && (
+              <button className="btn-primary" onClick={onClose}>
+                Done
+              </button>
+            )
+          )}
         </div>
       </div>
     </div>
   );
 }
-

@@ -7,6 +7,13 @@ const TOKEN_STORAGE_KEY = 'riyder_auth_token';
 const EMAIL_STORAGE_KEY = 'riyder_auth_email';
 const NAME_STORAGE_KEY = 'riyder_account_name';
 
+type UnauthorizedHandler = () => void;
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
+  unauthorizedHandler = handler;
+}
+
 export function getStoredToken(): string {
   return localStorage.getItem(TOKEN_STORAGE_KEY) || '';
 }
@@ -112,6 +119,15 @@ export async function apiRequest<T = Record<string, unknown>>(
   }
 
   if (!response.ok) {
+    if (response.status === 401 && normalizedEndpoint !== '/api/auth/sign-in') {
+      setStoredToken('');
+      if (unauthorizedHandler) {
+        unauthorizedHandler();
+      } else {
+        window.location.replace('/login');
+      }
+    }
+
     const errorMessage =
       (typeof data?.message === 'string' && data.message) ||
       (typeof data?.msg === 'string' && data.msg) ||

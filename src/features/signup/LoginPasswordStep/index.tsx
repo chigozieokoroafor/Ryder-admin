@@ -68,7 +68,7 @@ export default function LoginPasswordStep({
             <label htmlFor="login-password" style={{ marginBottom: 0 }}>
               Password
             </label>
-            <Link to="/signup" className="link" style={{ fontSize: '0.75rem' }}>
+            <Link to="/login" className="link" style={{ fontSize: '0.75rem' }}>
               Use a different email
             </Link>
           </div>

@@ -1,39 +1,30 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import OnboardingModal from '../OnboardingModal';
+import { useOutletContext } from 'react-router-dom';
+import type { DashboardOutletContext } from '../DashboardLayout/util';
 
-export interface DriversEmptyStateProps {
-  firstName?: string;
-  onNavigate?: (view: string) => void;
-}
-
-export default function DriversEmptyState({ firstName, onNavigate }: DriversEmptyStateProps) {
-  const [showModal, setShowModal] = useState<boolean>(true);
-  const navigate = useNavigate();
-
-  const handleModalNavigate = (view: string) => {
-    setShowModal(false);
-    if (onNavigate) {
-      onNavigate(view);
-    } else {
-      navigate(`/dashboard/${view.replace('_', '-')}`);
-    }
-  };
+export default function DriversEmptyState() {
+  const context = useOutletContext<DashboardOutletContext | undefined>();
+  const canAddDrivers = Boolean(
+    context?.checks?.busStops && context?.checks?.routesPricing
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-      {showModal && (
-        <OnboardingModal
-          firstName={firstName}
-          onNavigate={handleModalNavigate}
-          onClose={() => setShowModal(false)}
-        />
-      )}
-
       <div className="dashboard-header">
         <h1 className="dashboard-title">Drivers</h1>
-        <button className="btn-outline" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className={canAddDrivers ? 'btn-primary' : 'btn-outline'}
+          disabled={!canAddDrivers}
+          style={canAddDrivers ? { display: 'flex', alignItems: 'center', gap: '0.35rem' } : undefined}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={canAddDrivers ? { width: '16px', height: '16px' } : undefined}
+          >
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -79,18 +70,31 @@ export default function DriversEmptyState({ firstName, onNavigate }: DriversEmpt
         <p className="empty-subtitle">Drivers operate your routes. Add a driver to start tracking performance.</p>
 
         <div className="btn-wrapper">
-          <button className="btn-disabled-solid" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <button
+            className={canAddDrivers ? 'btn-primary' : 'btn-disabled-solid'}
+            disabled={!canAddDrivers}
+            style={canAddDrivers ? { display: 'flex', alignItems: 'center', gap: '0.35rem' } : undefined}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={canAddDrivers ? { width: '16px', height: '16px' } : undefined}
+            >
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
             Add driver
           </button>
 
-          <div className="tooltip">You cannot add drivers until stops and routes exist</div>
+          {!canAddDrivers && (
+            <div className="tooltip">You cannot add drivers until stops and routes exist</div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

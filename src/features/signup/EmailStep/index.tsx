@@ -5,12 +5,20 @@ import { checkEmailAccount, type CheckAuthData } from './util';
 export interface EmailStepProps {
   email: string;
   setEmail: Dispatch<SetStateAction<string>>;
+  mode?: 'signup' | 'login';
   onCheckComplete: (result: CheckAuthData) => void;
 }
 
-export default function EmailStep({ email, setEmail, onCheckComplete }: EmailStepProps) {
+export default function EmailStep({
+  email,
+  setEmail,
+  mode = 'signup',
+  onCheckComplete,
+}: EmailStepProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+
+  const isLoginMode = mode === 'login';
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,9 +49,14 @@ export default function EmailStep({ email, setEmail, onCheckComplete }: EmailSte
 
   return (
     <AuthLayout
-      title="Create your organisation account"
-      subtitle="Use your work email — it helps Riyder verify your organisation."
-      showLoginLink={true}
+      title={isLoginMode ? 'Sign in to your account' : 'Create your organisation account'}
+      subtitle={
+        isLoginMode
+          ? 'Enter your work email to access your Riyder organisation dashboard.'
+          : 'Use your work email — it helps Riyder verify your organisation.'
+      }
+      showLoginLink={!isLoginMode}
+      showSignupLink={isLoginMode}
     >
       <form className="form" onSubmit={handleSubmit}>
         <div className="input-group">
